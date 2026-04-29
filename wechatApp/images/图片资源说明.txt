@@ -1,0 +1,115 @@
+图片资源获取方案
+==================
+
+方案一：使用在线占位图（最简单，推荐开发阶段使用）
+------------------------------------------------
+直接使用在线图片服务，无需下载图片文件。
+
+1. 默认头像：https://via.placeholder.com/200/e0e0e0/999?text=Avatar
+2. Logo：https://via.placeholder.com/200/667eea/fff?text=Logo
+
+优点：无需下载，立即可用
+缺点：需要网络连接
+
+
+方案二：下载免费图标（推荐生产环境使用）
+------------------------------------------------
+从以下网站下载免费图标：
+
+1. 阿里巴巴矢量图标库（推荐）
+   网址：https://www.iconfont.cn/
+   - 搜索"头像"、"首页"、"社区"、"发布"、"用户"
+   - 下载 PNG 格式，尺寸选择 81x81（TabBar）或 200x200（头像）
+   - 重命名为对应的文件名
+
+2. Flaticon
+   网址：https://www.flaticon.com/
+   - 搜索对应的图标
+   - 下载免费版本
+
+3. IconMonstr
+   网址：https://iconmonstr.com/
+   - 简洁的图标库
+   - 完全免费
+
+
+方案三：使用 base64 图片（已实现）
+------------------------------------------------
+已在 utils/defaultImages.js 中提供了 base64 编码的默认图片。
+
+使用方法：
+在页面 JS 中引入：
+const defaultImages = require('../../utils/defaultImages.js')
+
+在 data 中设置：
+data: {
+  defaultAvatar: defaultImages.DEFAULT_AVATAR
+}
+
+在 WXML 中使用：
+<image src="{{item.avatar || defaultAvatar}}" />
+
+
+方案四：创建简单的纯色图片（临时方案）
+------------------------------------------------
+使用任何图片编辑工具（如 Windows 画图、Photoshop）：
+
+1. 默认头像 (default-avatar.png)
+   - 尺寸：200x200 像素
+   - 背景：灰色 (#e0e0e0)
+   - 内容：画一个圆形或写"头像"两个字
+
+2. TabBar 图标 (81x81 像素)
+   - home.png / home-active.png
+   - community.png / community-active.png
+   - publish.png / publish-active.png
+   - user.png / user-active.png
+   
+   未选中：灰色 (#999999)
+   选中：蓝色 (#1890ff)
+
+
+推荐操作步骤（最快速）
+================================================
+
+步骤1：创建 images 文件夹
+在 wechatApp 目录下创建 images 文件夹
+
+步骤2：下载图片
+访问 https://www.iconfont.cn/
+搜索并下载以下图标：
+- 头像图标（200x200）
+- 首页图标（81x81）
+- 社区图标（81x81）
+- 加号图标（81x81）
+- 用户图标（81x81）
+
+步骤3：重命名文件
+将下载的图片重命名为：
+- default-avatar.png
+- home.png, home-active.png
+- community.png, community-active.png
+- publish.png, publish-active.png
+- user.png, user-active.png
+- logo.png
+
+步骤4：放入 images 文件夹
+将所有图片文件复制到 wechatApp/images/ 文件夹中
+
+完成！刷新小程序即可看到图片正常显示。
+
+
+临时解决方案（立即可用）
+================================================
+如果暂时不想下载图片，可以使用在线图片：
+
+在 app.json 中添加域名白名单：
+"request": {
+  "uploadFile": 10000,
+  "downloadFile": 10000
+},
+"downloadFile": {
+  "timeout": 10000
+}
+
+然后在代码中使用在线图片地址即可。

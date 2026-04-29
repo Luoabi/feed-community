@@ -1,0 +1,230 @@
+<view class="container">
+  <!-- 分类栏 -->
+  <view class="category-bar">
+    <scroll-view scroll-x class="category-scroll" show-scrollbar="{{false}}">
+      <view 
+        class="category-item {{currentCategory && currentCategory.id === item.id ? 'active' : ''}}"
+        wx:for="{{categories}}" 
+        wx:key="id"
+        data-category="{{item}}"
+        bindtap="onCategoryTap"
+      >
+        <text class="category-text">{{item.categoryName}}</text>
+        <view class="category-badge" wx:if="{{item.id === null}}">🔥</view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 内容列表 -->
+  <view class="content-list">
+    <view 
+      class="content-card content-card-{{item.contentType}}"
+      wx:for="{{contents}}" 
+      wx:key="id"
+      data-id="{{item.id}}"
+      bindtap="onContentTap"
+    >
+      <!-- 文章类型 -->
+      <block wx:if="{{item.contentType === 'article'}}">
+        <view class="content-cover" wx:if="{{item.coverImage}}">
+          <image src="{{item.coverImage}}" mode="aspectFill" class="cover-image" lazy-load></image>
+          <view class="cover-overlay"></view>
+          <view class="content-type-badge">📄 文章</view>
+        </view>
+        <view class="content-info">
+          <view class="content-title">{{item.title}}</view>
+          <view class="content-summary" wx:if="{{item.summary}}">{{item.summary}}</view>
+          <view class="content-footer">
+            <view class="author-section">
+              <image class="author-avatar" src="{{item.authorAvatar || '/images/default-avatar.svg'}}" mode="aspectFill"></image>
+              <text class="author-name">{{item.authorName}}</text>
+            </view>
+            <view class="stats-section">
+              <view class="stat-item">
+                <text class="stat-icon">👁</text>
+                <text class="stat-text">{{item.views || 0}}</text>
+              </view>
+              <view class="stat-item">
+                <text class="stat-icon">❤️</text>
+                <text class="stat-text">{{item.likes || 0}}</text>
+              </view>
+            </view>
+          </view>
+        </view>
+      </block>
+
+      <!-- 图片类型 -->
+      <block wx:elif="{{item.contentType === 'image'}}">
+        <view class="image-grid">
+          <view class="content-type-badge">🖼️ 图片</view>
+          <image 
+            wx:if="{{item.images && item.images.length === 1}}" 
+            src="{{item.images[0]}}" 
+            mode="aspectFill" 
+            class="single-image"
+            lazy-load
+          ></image>
+          <view wx:elif="{{item.images && item.images.length > 1}}" class="multi-images">
+            <image 
+              wx:for="{{item.images.slice(0, 3)}}" 
+              wx:key="index"
+              wx:for-item="img"
+              src="{{img}}" 
+              mode="aspectFill" 
+              class="grid-image"
+              lazy-load
+            ></image>
+            <view wx:if="{{item.images.length > 3}}" class="more-images">+{{item.images.length - 3}}</view>
+          </view>
+        </view>
+        <view class="content-info">
+          <view class="content-title">{{item.title}}</view>
+          <view class="content-footer">
+            <view class="author-section">
+              <image class="author-avatar" src="{{item.authorAvatar || '/images/default-avatar.svg'}}" mode="aspectFill"></image>
+              <text class="author-name">{{item.authorName}}</text>
+            </view>
+            <view class="stats-section">
+              <view class="stat-item">
+                <text class="stat-icon">❤️</text>
+                <text class="stat-text">{{item.likes || 0}}</text>
+              </view>
+              <view class="stat-item">
+                <text class="stat-icon">💬</text>
+                <text class="stat-text">{{item.comments || 0}}</text>
+              </view>
+            </view>
+          </view>
+        </view>
+      </block>
+
+      <!-- 视频类型 -->
+      <block wx:elif="{{item.contentType === 'video'}}">
+        <view class="video-wrapper">
+          <view class="video-container" catchtap="stopPropagation">
+            <view class="content-type-badge">🎬 视频</view>
+            <!-- 使用 video 组件直接播放 -->
+            <video 
+              wx:if="{{item.videoUrl}}"
+              id="video-{{item.id}}"
+              src="{{item.videoUrl}}"
+              poster="{{item.coverImage || item.videoThumb}}"
+              object-fit="cover"
+              show-center-play-btn="{{true}}"
+              show-play-btn="{{true}}"
+              show-fullscreen-btn="{{true}}"
+              show-progress="{{true}}"
+              enable-progress-gesture="{{true}}"
+              class="video-player"
+              bindplay="onVideoPlay"
+              bindpause="onVideoPause"
+              bindended="onVideoEnded"
+              binderror="onVideoError"
+              data-id="{{item.id}}"
+            ></video>
+            <!-- 如果没有视频URL，显示占位图 -->
+            <view wx:else class="video-placeholder">
+              <image src="{{item.coverImage || item.videoThumb}}" mode="aspectFill" class="video-thumb" lazy-load></image>
+              <view class="video-play-btn">▶</view>
+              <view class="video-error-tip">视频地址无效</view>
+            </view>
+            <view class="video-duration" wx:if="{{item.videoDuration}}">{{item.videoDuration}}</view>
+          </view>
+          <!-- 视频信息区域可点击跳转详情 -->
+          <view class="content-info" bindtap="onContentTap" data-id="{{item.id}}">
+            <view class="content-title">{{item.title}}</view>
+            <view class="content-summary" wx:if="{{item.summary}}">{{item.summary}}</view>
+            <view class="content-footer">
+              <view class="author-section">
+                <image class="author-avatar" src="{{item.authorAvatar || '/images/default-avatar.svg'}}" mode="aspectFill"></image>
+                <text class="author-name">{{item.authorName}}</text>
+              </view>
+              <view class="stats-section">
+                <view class="stat-item">
+                  <text class="stat-icon">👁</text>
+                  <text class="stat-text">{{item.views || 0}}</text>
+                </view>
+                <view class="stat-item">
+                  <text class="stat-icon">❤️</text>
+                  <text class="stat-text">{{item.likes || 0}}</text>
+                </view>
+              </view>
+            </view>
+          </view>
+        </view>
+      </block>
+
+      <!-- 链接类型 -->
+      <block wx:elif="{{item.linkUrl}}">
+        <view class="link-preview">
+          <view class="content-type-badge">🔗 链接</view>
+          <image wx:if="{{item.coverImage}}" src="{{item.coverImage}}" mode="aspectFill" class="link-thumb" lazy-load></image>
+          <view class="link-icon" wx:else>🌐</view>
+        </view>
+        <view class="content-info content-info-link">
+          <view class="content-title">{{item.title}}</view>
+          <view class="content-summary" wx:if="{{item.summary}}">{{item.summary}}</view>
+          <view class="link-url-display">
+            <text class="link-url-icon">🔗</text>
+            <text class="link-url-text">{{item.linkUrl}}</text>
+          </view>
+          <view class="content-footer">
+            <view class="author-section">
+              <image class="author-avatar" src="{{item.authorAvatar || '/images/default-avatar.svg'}}" mode="aspectFill"></image>
+              <text class="author-name">{{item.authorName}}</text>
+            </view>
+            <view class="stats-section">
+              <view class="stat-item">
+                <text class="stat-icon">❤️</text>
+                <text class="stat-text">{{item.likes || 0}}</text>
+              </view>
+            </view>
+          </view>
+        </view>
+      </block>
+
+      <!-- 默认类型（纯文本） -->
+      <block wx:else>
+        <view class="content-info content-info-text">
+          <view class="content-title">{{item.title}}</view>
+          <view class="content-summary" wx:if="{{item.summary || item.content}}">{{item.summary || item.content}}</view>
+          <view class="content-footer">
+            <view class="author-section">
+              <image class="author-avatar" src="{{item.authorAvatar || '/images/default-avatar.svg'}}" mode="aspectFill"></image>
+              <text class="author-name">{{item.authorName}}</text>
+            </view>
+            <view class="stats-section">
+              <view class="stat-item">
+                <text class="stat-icon">❤️</text>
+                <text class="stat-text">{{item.likes || 0}}</text>
+              </view>
+              <view class="stat-item">
+                <text class="stat-icon">💬</text>
+                <text class="stat-text">{{item.comments || 0}}</text>
+              </view>
+            </view>
+          </view>
+        </view>
+      </block>
+    </view>
+    
+    <!-- 加载状态 -->
+    <view class="loading" wx:if="{{loading}}">
+      <view class="loading-spinner"></view>
+      <text class="loading-text">加载中...</text>
+    </view>
+    
+    <!-- 没有更多 -->
+    <view class="no-more" wx:if="{{!hasMore && contents.length > 0}}">
+      <view class="no-more-line"></view>
+      <text class="no-more-text">没有更多了</text>
+      <view class="no-more-line"></view>
+    </view>
+    
+    <!-- 空状态 -->
+    <view class="empty-state" wx:if="{{!loading && contents.length === 0}}">
+      <text class="empty-icon">📭</text>
+      <text class="empty-text">暂无内容</text>
+    </view>
+  </view>
+</view>

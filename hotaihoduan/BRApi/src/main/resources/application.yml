@@ -1,0 +1,93 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+spring:
+  application:
+    name: BRApi
+  
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/hotai_db?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&autoDeserialize=true
+    username: root
+    password: root
+  
+  # 文件上传配置
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 50MB
+      max-request-size: 100MB
+
+# MyBatis-Plus配置
+mybatis-plus:
+  mapper-locations: classpath:mapper/**/*.xml
+  type-aliases-package: org.xingchang.brapi.entity
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    cache-enabled: true
+    # ✅ 启用自动映射，确保 JSON 字段能正确映射
+    auto-mapping-behavior: full
+  global-config:
+    db-config:
+      id-type: auto
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+    # ✅ 启用 Banner（可选）
+    banner: true
+  # 分页配置
+  pagination:
+    optimize-join-of-count-sql: true
+  # ✅ 类型处理器包扫描（确保 JacksonTypeHandler 被正确加载）
+  type-handlers-package: com.baomidou.mybatisplus.extension.handlers
+
+# Swagger配置
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+    # 默认展开所有接口
+    doc-expansion: none
+    # 默认展开所有标签
+    default-models-expand-depth: 10
+    default-model-expand-depth: 10
+    # 显示请求持续时间
+    display-request-duration: true
+  api-docs:
+    path: /v3/api-docs
+  # 移除分组配置，显示所有接口在一个页面
+  # group-configs:
+  #   - group: '系统管理'
+  #     paths-to-match: '/system/**'
+  #   - group: '内容管理'
+  #     paths-to-match: '/content/**'
+  #   - group: '社区管理'
+  #     paths-to-match: '/community/**'
+  #   - group: '互动数据'
+  #     paths-to-match: '/interaction/**'
+  #   - group: '用户标签'
+  #     paths-to-match: '/tag/**'
+
+# JWT配置
+jwt:
+  secret: xingchang-hotai-secret-key-2024-very-long-secret-key-for-jwt-token
+  expiration: 86400000
+
+# 文件上传配置
+file:
+  upload:
+    path: uploads
+    domain: http://localhost:8080/api
+
+# 日志配置
+logging:
+  level:
+    org.xingchang.brapi: debug
+    org.springframework.web: info
+    com.baomidou.mybatisplus: debug
+  pattern:
+    console: '%d{yyyy-MM-dd HH:mm:ss} - %msg%n'

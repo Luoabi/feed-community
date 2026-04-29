@@ -1,0 +1,32 @@
+<view class="container">
+  <view class="content-list">
+    <view 
+      class="content-card"
+      wx:for="{{contents}}" 
+      wx:key="id"
+      data-id="{{item.id}}"
+      bindtap="onContentTap"
+    >
+      <view class="content-cover" wx:if="{{item.coverImage}}">
+        <image src="{{item.coverImage}}" mode="aspectFill" class="cover-image"></image>
+      </view>
+      <view class="content-info">
+        <view class="content-title">{{item.title}}</view>
+        <view class="content-summary">{{item.summary}}</view>
+        <view class="content-meta">
+          <text class="author">{{item.authorName}}</text>
+          <text class="views">{{item.views}}浏览</text>
+          <text class="likes">{{item.likes}}赞</text>
+        </view>
+      </view>
+    </view>
+    
+    <view class="loading" wx:if="{{loading}}">
+      <text>加载中...</text>
+    </view>
+    
+    <view class="no-more" wx:if="{{!hasMore && contents.length > 0}}">
+      <text>没有更多了</text>
+    </view>
+  </view>
+</view>

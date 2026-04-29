@@ -1,0 +1,11 @@
+<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="fireGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#ff6b35;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f7931e;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <circle cx="100" cy="100" r="90" fill="url(#fireGradient)"/>
+  <path d="M 100 50 Q 80 70 80 90 Q 80 110 100 130 Q 120 110 120 90 Q 120 70 100 50 Z" fill="#fff"/>
+  <ellipse cx="100" cy="95" rx="8" ry="12" fill="#ff6b35"/>
+</svg>

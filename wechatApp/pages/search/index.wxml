@@ -1,0 +1,145 @@
+<view class="container">
+  <!-- 搜索栏 -->
+  <view class="search-header" style="padding-top: {{statusBarHeight}}px;">
+    <view class="search-box">
+      <text class="search-icon">🔍</text>
+      <input 
+        class="search-input" 
+        placeholder="搜索感兴趣的内容..." 
+        value="{{keyword}}"
+        bindinput="onKeywordInput"
+        bindconfirm="onSearch"
+        focus="{{autoFocus}}"
+        confirm-type="search"
+      />
+      <text class="clear-icon" wx:if="{{keyword}}" bindtap="onClearKeyword">✕</text>
+    </view>
+    <text class="cancel-btn" bindtap="onCancel">取消</text>
+  </view>
+
+  <!-- 占位，避免内容被导航栏遮挡 -->
+  <view style="height: {{navBarHeight}}px;"></view>
+
+  <!-- 搜索建议（输入时显示） -->
+  <view class="search-suggest" wx:if="{{keyword && !hasSearched}}">
+    <view 
+      class="suggest-item"
+      wx:for="{{suggestList}}" 
+      wx:key="index"
+      bindtap="onSuggestTap"
+      data-keyword="{{item}}"
+    >
+      <text class="suggest-icon">🔍</text>
+      <text class="suggest-text">{{item}}</text>
+    </view>
+  </view>
+
+  <!-- 搜索前显示 -->
+  <view class="search-before" wx:if="{{!hasSearched}}">
+    <!-- 搜索历史 -->
+    <view class="history-section" wx:if="{{searchHistory.length > 0}}">
+      <view class="section-header">
+        <text class="section-title">搜索历史</text>
+        <text class="clear-history" bindtap="onClearHistory">清空</text>
+      </view>
+      <view class="history-tags">
+        <view 
+          class="history-tag"
+          wx:for="{{searchHistory}}" 
+          wx:key="index"
+          bindtap="onHistoryTap"
+          data-keyword="{{item}}"
+        >
+          <text class="tag-text">{{item}}</text>
+          <text class="tag-close" catchtap="onDeleteHistory" data-index="{{index}}">✕</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 热门搜索 -->
+    <view class="hot-section">
+      <view class="section-header">
+        <text class="section-title">热门搜索</text>
+        <text class="hot-icon">🔥</text>
+      </view>
+      <view class="hot-tags">
+        <view 
+          class="hot-tag hot-tag-{{index < 3 ? 'top' : ''}}"
+          wx:for="{{hotSearchList}}" 
+          wx:key="index"
+          bindtap="onHotTap"
+          data-keyword="{{item}}"
+        >
+          <text class="tag-rank" wx:if="{{index < 3}}">{{index + 1}}</text>
+          <text class="tag-text">{{item}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 搜索结果 -->
+  <view class="search-results" wx:if="{{hasSearched}}">
+    <!-- 结果统计 -->
+    <view class="result-header" wx:if="{{!loading}}">
+      <text class="result-count">找到 {{totalCount}} 条相关内容</text>
+    </view>
+
+    <!-- 内容列表 -->
+    <view class="content-list">
+      <view 
+        class="content-card"
+        wx:for="{{searchResults}}" 
+        wx:key="id"
+        data-id="{{item.id}}"
+        bindtap="onContentTap"
+      >
+        <!-- 有封面图 -->
+        <view class="card-with-image" wx:if="{{item.coverImage}}">
+          <view class="card-content">
+            <view class="content-title">{{item.title}}</view>
+            <view class="content-summary" wx:if="{{item.summary}}">{{item.summary}}</view>
+            <view class="content-meta">
+              <text class="meta-item">{{item.authorName}}</text>
+              <text class="meta-dot">·</text>
+              <text class="meta-item">{{item.views || 0}}浏览</text>
+            </view>
+          </view>
+          <image class="card-image" src="{{item.coverImage}}" mode="aspectFill" lazy-load></image>
+        </view>
+
+        <!-- 无封面图 -->
+        <view class="card-no-image" wx:else>
+          <view class="content-title">{{item.title}}</view>
+          <view class="content-summary" wx:if="{{item.summary || item.content}}">{{item.summary || item.content}}</view>
+          <view class="content-meta">
+            <text class="meta-item">{{item.authorName}}</text>
+            <text class="meta-dot">·</text>
+            <text class="meta-item">{{item.views || 0}}浏览</text>
+            <text class="meta-dot">·</text>
+            <text class="meta-item">{{item.createTime}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 加载状态 -->
+    <view class="loading" wx:if="{{loading}}">
+      <view class="loading-spinner"></view>
+      <text class="loading-text">搜索中...</text>
+    </view>
+
+    <!-- 没有更多 -->
+    <view class="no-more" wx:if="{{!hasMore && searchResults.length > 0}}">
+      <view class="no-more-line"></view>
+      <text class="no-more-text">没有更多了</text>
+      <view class="no-more-line"></view>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="empty-state" wx:if="{{!loading && searchResults.length === 0}}">
+      <text class="empty-icon">🔍</text>
+      <text class="empty-text">没有找到相关内容</text>
+      <text class="empty-tip">换个关键词试试吧</text>
+    </view>
+  </view>
+</view>

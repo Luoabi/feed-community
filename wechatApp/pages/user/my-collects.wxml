@@ -1,0 +1,56 @@
+<view class="container">
+  <view class="collects-list">
+    <view 
+      class="collect-item" 
+      wx:for="{{collects}}" 
+      wx:key="id"
+    >
+      <view 
+        class="item-main"
+        bindtap="onItemTap"
+        data-id="{{item.contentId || item.id}}"
+        data-type="{{item.contentType || 'content'}}"
+      >
+        <view class="item-header">
+          <image class="author-avatar" src="{{item.authorAvatar || '/images/default-avatar.svg'}}"></image>
+          <view class="author-info">
+            <text class="author-name">{{item.authorName}}</text>
+            <text class="collect-time">{{item.createTime}}</text>
+          </view>
+        </view>
+        
+        <view class="item-content">
+          <view class="content-text">
+            <text class="content-title" wx:if="{{item.title}}">{{item.title}}</text>
+            <text class="content-desc">{{item.content}}</text>
+          </view>
+          <image 
+            wx:if="{{item.coverImage || (item.images && item.images[0])}}"
+            class="content-cover" 
+            src="{{item.coverImage || item.images[0]}}" 
+            mode="aspectFill"
+          />
+        </view>
+        
+        <view class="item-stats">
+          <text class="stat-item">❤️ {{item.likes || 0}}</text>
+          <text class="stat-item">⭐ {{item.collects || 0}}</text>
+        </view>
+      </view>
+      
+      <button 
+        class="cancel-btn" 
+        catchtap="onCancelCollect" 
+        data-id="{{item.id}}"
+      >取消收藏</button>
+    </view>
+  </view>
+
+  <view class="empty-tip" wx:if="{{!loading && collects.length === 0}}">
+    <text>暂无收藏</text>
+  </view>
+
+  <view class="loading-tip" wx:if="{{loading}}">
+    <text>加载中...</text>
+  </view>
+</view>

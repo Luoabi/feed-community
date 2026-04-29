@@ -1,0 +1,147 @@
+<view class="container">
+  <view class="content-detail" wx:if="{{content}}">
+    <!-- 内容标题 -->
+    <view class="content-title">{{content.title}}</view>
+
+    <!-- 作者信息 -->
+    <view class="content-meta">
+      <image class="author-avatar" src="{{content.authorAvatar || '/images/default-avatar.svg'}}"/>
+      <view class="author-info">
+        <text class="author-name">{{content.authorName}}</text>
+        <text class="publish-time">{{content.createTime}}</text>
+      </view>
+      <view class="content-type-tag">
+        <text wx:if="{{content.contentType === 'article'}}">📄 文章</text>
+        <text wx:elif="{{content.contentType === 'image'}}">🖼️ 图片</text>
+        <text wx:elif="{{content.contentType === 'video'}}">🎬 视频</text>
+        <text wx:elif="{{content.contentType === 'link'}}">🔗 链接</text>
+        <text wx:else>📝 文本</text>
+      </view>
+    </view>
+
+    <!-- 文章类型：封面图 + 正文 -->
+    <block wx:if="{{content.contentType === 'article'}}">
+      <view class="content-cover" wx:if="{{content.coverImage}}">
+        <image class="cover-image" src="{{content.coverImage}}" mode="aspectFill"/>
+      </view>
+      <view class="content-body">{{content.content}}</view>
+    </block>
+
+    <!-- 图片类型：图片画廊 -->
+    <block wx:elif="{{content.contentType === 'image'}}">
+      <view class="image-gallery">
+        <view 
+          wx:for="{{content.images}}" 
+          wx:key="index"
+          class="gallery-item"
+          data-index="{{index}}"
+          bindtap="onPreviewImage"
+        >
+          <image src="{{item}}" mode="aspectFill" class="gallery-image"/>
+        </view>
+      </view>
+      <view class="content-body" wx:if="{{content.content}}">{{content.content}}</view>
+    </block>
+
+    <!-- 视频类型：视频播放器 -->
+    <block wx:elif="{{content.contentType === 'video'}}">
+      <view class="video-player-container">
+        <video 
+          src="{{content.videoUrl}}" 
+          poster="{{content.coverImage || content.videoThumb}}"
+          controls
+          class="video-player"
+          object-fit="contain"
+          show-center-play-btn
+          show-fullscreen-btn
+        ></video>
+      </view>
+      <view class="content-body" wx:if="{{content.content}}">{{content.content}}</view>
+    </block>
+
+    <!-- 有链接：显示链接卡片（根据 linkUrl 字段判断） -->
+    <block wx:elif="{{content.linkUrl}}">
+      <view class="link-card-container">
+        <view class="link-card">
+          <view class="link-icon-large">🔗</view>
+          <view class="link-info">
+            <view class="link-label">链接地址</view>
+            <view class="link-url">{{content.linkUrl}}</view>
+          </view>
+        </view>
+        <button class="copy-link-btn" data-url="{{content.linkUrl}}" bindtap="onCopyLink">复制链接</button>
+      </view>
+      <view class="content-body" wx:if="{{content.content}}">{{content.content}}</view>
+    </block>
+
+    <!-- 纯文本类型 -->
+    <block wx:else>
+      <view class="content-body">{{content.content}}</view>
+    </block>
+
+    <!-- 统计信息 -->
+    <view class="stats-bar">
+      <view class="stat-item">
+        <text class="stat-value">{{content.views || 0}}</text>
+        <text class="stat-label">浏览</text>
+      </view>
+      <view class="stat-item">
+        <text class="stat-value">{{content.likes || 0}}</text>
+        <text class="stat-label">点赞</text>
+      </view>
+      <view class="stat-item">
+        <text class="stat-value">{{content.comments || 0}}</text>
+        <text class="stat-label">评论</text>
+      </view>
+      <view class="stat-item">
+        <text class="stat-value">{{content.collects || 0}}</text>
+        <text class="stat-label">收藏</text>
+      </view>
+    </view>
+
+    <!-- 操作栏 -->
+    <view class="action-bar">
+      <button class="action-btn" bindtap="onLikeTap">
+        <text class="action-icon">❤️</text>
+        <text>点赞</text>
+      </button>
+      <button class="action-btn" bindtap="onCollectTap">
+        <text class="action-icon">⭐</text>
+        <text>收藏</text>
+      </button>
+      <button class="action-btn" open-type="share" bindtap="onShareTap">
+        <text class="action-icon">🔗</text>
+        <text>分享</text>
+      </button>
+    </view>
+  </view>
+
+  <!-- 评论区 -->
+  <view class="comments-section">
+    <view class="section-title">评论 ({{comments.length}})</view>
+    <view class="comment-list">
+      <view class="comment-item" wx:for="{{comments}}" wx:key="id">
+        <image class="comment-avatar" src="{{item.userAvatar || '/images/default-avatar.svg'}}"/>
+        <view class="comment-content">
+          <text class="comment-user">{{item.userName}}</text>
+          <text class="comment-text">{{item.content}}</text>
+          <view class="comment-meta">
+            <text class="comment-time">{{item.createTime}}</text>
+            <text class="comment-likes">❤️ {{item.likes || 0}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 评论输入框 -->
+  <view class="comment-input-bar">
+    <input 
+      class="comment-input" 
+      placeholder="说点什么..." 
+      value="{{commentText}}"
+      bindinput="onCommentInput"
+    />
+    <button class="send-btn" bindtap="onSendComment">发送</button>
+  </view>
+</view>

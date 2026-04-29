@@ -1,0 +1,117 @@
+<view class="container">
+  <!-- 顶部装饰 -->
+  <view class="header-decoration"></view>
+  
+  <!-- 帖子列表 -->
+  <view class="post-list">
+    <view 
+      class="post-card"
+      wx:for="{{posts}}" 
+      wx:key="id"
+      data-id="{{item.id}}"
+      bindtap="onPostTap"
+    >
+      <!-- 帖子头部 -->
+      <view class="post-header">
+        <image class="author-avatar" src="{{item.authorAvatar || '/images/default-avatar.svg'}}" mode="aspectFill"></image>
+        <view class="author-info">
+          <text class="author-name">{{item.authorName}}</text>
+          <text class="create-time">{{item.createTime}}</text>
+        </view>
+      </view>
+      
+      <!-- 帖子标题 -->
+      <view class="post-title" wx:if="{{item.title}}">{{item.title}}</view>
+      
+      <!-- 有链接的帖子 -->
+      <block wx:if="{{item.linkUrl}}">
+        <view class="post-link-preview">
+          <view class="link-icon">🔗</view>
+          <view class="link-info">
+            <view class="link-url">{{item.linkUrl}}</view>
+            <view class="link-hint">点击查看链接详情</view>
+          </view>
+        </view>
+        <!-- 链接描述 -->
+        <view class="post-content" wx:if="{{item.content}}">{{item.content}}</view>
+      </block>
+      
+      <!-- 有视频的帖子 -->
+      <block wx:elif="{{item.videoUrl}}">
+        <view class="post-video-preview">
+          <image class="video-thumb" src="{{item.coverImage}}" mode="aspectFill" wx:if="{{item.coverImage}}"></image>
+          <view class="video-play-icon">▶️</view>
+          <view class="video-duration" wx:if="{{item.videoDuration}}">{{item.videoDuration}}</view>
+        </view>
+        <!-- 视频描述 -->
+        <view class="post-content post-content-with-images" wx:if="{{item.content}}">{{item.content}}</view>
+      </block>
+      
+      <!-- 有图片的帖子 -->
+      <block wx:elif="{{item.images && item.images.length > 0}}">
+        <!-- 图片网格 -->
+        <view class="post-images">
+          <view class="images-grid images-{{item.images.length <= 3 ? item.images.length : 'more'}}">
+            <image 
+              class="post-image" 
+              src="{{img}}" 
+              wx:for="{{item.images}}" 
+              wx:for-item="img"
+              wx:key="*this"
+              mode="aspectFill"
+              lazy-load
+            ></image>
+          </view>
+        </view>
+        
+        <!-- 图片帖子的文字描述（如果有） -->
+        <view class="post-content post-content-with-images" wx:if="{{item.content}}">{{item.content}}</view>
+      </block>
+      
+      <!-- 纯文本帖子 -->
+      <block wx:else>
+        <view class="post-content">{{item.content}}</view>
+      </block>
+      
+      <!-- 统计信息 -->
+      <view class="post-stats">
+        <view class="stat-item">
+          <text class="stat-icon">👁</text>
+          <text class="stat-text">{{item.views || 0}}</text>
+        </view>
+        <view class="stat-item">
+          <text class="stat-icon">❤️</text>
+          <text class="stat-text">{{item.likes || 0}}</text>
+        </view>
+        <view class="stat-item">
+          <text class="stat-icon">💬</text>
+          <text class="stat-text">{{item.comments || 0}}</text>
+        </view>
+        <view class="stat-item">
+          <text class="stat-icon">🔗</text>
+          <text class="stat-text">{{item.shares || 0}}</text>
+        </view>
+      </view>
+    </view>
+    
+    <!-- 加载状态 -->
+    <view class="loading" wx:if="{{loading}}">
+      <view class="loading-spinner"></view>
+      <text class="loading-text">加载中...</text>
+    </view>
+    
+    <!-- 没有更多 -->
+    <view class="no-more" wx:if="{{!hasMore && posts.length > 0}}">
+      <view class="no-more-line"></view>
+      <text class="no-more-text">没有更多了</text>
+      <view class="no-more-line"></view>
+    </view>
+    
+    <!-- 空状态 -->
+    <view class="empty-state" wx:if="{{!loading && posts.length === 0}}">
+      <text class="empty-icon">📝</text>
+      <text class="empty-text">还没有帖子</text>
+      <text class="empty-hint">快去发布第一条帖子吧</text>
+    </view>
+  </view>
+</view>

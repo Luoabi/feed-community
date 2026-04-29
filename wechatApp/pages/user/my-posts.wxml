@@ -1,0 +1,102 @@
+<view class="container">
+  <!-- ✅ 状态筛选器 -->
+  <view class="filter-bar">
+    <view 
+      class="filter-item {{statusFilter === '' ? 'active' : ''}}"
+      bindtap="onFilterChange"
+      data-status=""
+    >
+      全部 ({{totalCount}})
+    </view>
+    <view 
+      class="filter-item {{statusFilter === 'pending' ? 'active' : ''}}"
+      bindtap="onFilterChange"
+      data-status="pending"
+    >
+      审核中 ({{pendingCount}})
+    </view>
+    <view 
+      class="filter-item {{statusFilter === 'published' ? 'active' : ''}}"
+      bindtap="onFilterChange"
+      data-status="published"
+    >
+      已发布 ({{publishedCount}})
+    </view>
+    <view 
+      class="filter-item {{statusFilter === 'rejected' ? 'active' : ''}}"
+      bindtap="onFilterChange"
+      data-status="rejected"
+    >
+      已拒绝 ({{rejectedCount}})
+    </view>
+  </view>
+
+  <view class="posts-list">
+    <view 
+      class="post-item" 
+      wx:for="{{posts}}" 
+      wx:key="id"
+      bindtap="onPostTap"
+      data-id="{{item.id}}"
+    >
+      <view class="post-header">
+        <image class="author-avatar" src="{{item.authorAvatar || '/images/default-avatar.svg'}}"></image>
+        <view class="author-info">
+          <text class="author-name">{{item.authorName}}</text>
+          <text class="post-time">{{item.createTime}}</text>
+        </view>
+        <!-- ✅ 审核状态标识 -->
+        <view class="status-badge status-{{item.status}}">
+          <text wx:if="{{item.status === 'pending'}}">⏳ 审核中</text>
+          <text wx:elif="{{item.status === 'published'}}">✅ 已发布</text>
+          <text wx:elif="{{item.status === 'rejected'}}">❌ 已拒绝</text>
+          <text wx:else>📝 草稿</text>
+        </view>
+        <button 
+          class="delete-btn" 
+          catchtap="onDeletePost" 
+          data-id="{{item.id}}"
+        >删除</button>
+      </view>
+      
+      <view class="post-content">
+        <text class="post-title" wx:if="{{item.title}}">{{item.title}}</text>
+        <text class="post-text">{{item.content}}</text>
+        
+        <!-- ✅ 拒绝原因提示 -->
+        <view class="reject-reason" wx:if="{{item.status === 'rejected' && item.rejectReason}}">
+          <view class="reject-header">
+            <text class="reject-icon">⚠️</text>
+            <text class="reject-title">拒绝原因</text>
+          </view>
+          <text class="reject-text">{{item.rejectReason}}</text>
+        </view>
+      </view>
+      
+      <view class="post-images" wx:if="{{item.images && item.images.length > 0}}">
+        <image 
+          wx:for="{{item.images}}" 
+          wx:key="*this"
+          wx:for-item="img"
+          class="post-image" 
+          src="{{img}}" 
+          mode="aspectFill"
+        />
+      </view>
+      
+      <view class="post-stats">
+        <text class="stat-item">👁️ {{item.views || 0}}</text>
+        <text class="stat-item">❤️ {{item.likes || 0}}</text>
+        <text class="stat-item">💬 {{item.comments || 0}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="empty-tip" wx:if="{{!loading && posts.length === 0}}">
+    <text>暂无帖子</text>
+  </view>
+
+  <view class="loading-tip" wx:if="{{loading}}">
+    <text>加载中...</text>
+  </view>
+</view>

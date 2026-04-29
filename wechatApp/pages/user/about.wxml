@@ -1,0 +1,120 @@
+<view class="container">
+  <!-- Logo 和应用名称 -->
+  <view class="app-header">
+    <image class="app-logo" src="/images/logo.png" mode="aspectFit"></image>
+    <text class="app-name">火泰内容</text>
+    <text class="app-version">v1.0.0</text>
+    <text class="app-slogan">发现精彩，分享生活</text>
+  </view>
+
+  <!-- 应用介绍 -->
+  <view class="section">
+    <view class="section-title">关于我们</view>
+    <view class="section-content">
+      <text class="intro-text">火泰内容是一个集内容发布、社区互动、知识分享于一体的综合性平台。我们致力于为用户提供优质的内容体验，让每个人都能在这里找到属于自己的精彩。</text>
+    </view>
+  </view>
+
+  <!-- 功能特色 -->
+  <view class="section">
+    <view class="section-title">功能特色</view>
+    <view class="feature-list">
+      <view class="feature-item">
+        <view class="feature-icon">📝</view>
+        <view class="feature-info">
+          <text class="feature-name">内容发布</text>
+          <text class="feature-desc">支持文章、图片、视频、链接等多种内容形式</text>
+        </view>
+      </view>
+      <view class="feature-item">
+        <view class="feature-icon">💬</view>
+        <view class="feature-info">
+          <text class="feature-name">社区互动</text>
+          <text class="feature-desc">点赞、评论、收藏，与志同道合的朋友交流</text>
+        </view>
+      </view>
+      <view class="feature-item">
+        <view class="feature-icon">🔍</view>
+        <view class="feature-info">
+          <text class="feature-name">智能推荐</text>
+          <text class="feature-desc">基于兴趣的个性化内容推荐算法</text>
+        </view>
+      </view>
+      <view class="feature-item">
+        <view class="feature-icon">🎨</view>
+        <view class="feature-info">
+          <text class="feature-name">精美设计</text>
+          <text class="feature-desc">简洁优雅的界面设计，流畅的使用体验</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 联系我们 -->
+  <view class="section">
+    <view class="section-title">联系我们</view>
+    <view class="contact-list">
+      <view class="contact-item" bindtap="onCopyEmail">
+        <view class="contact-left">
+          <text class="contact-icon">📧</text>
+          <text class="contact-text">邮箱</text>
+        </view>
+        <view class="contact-right">
+          <text class="contact-value">support@hotai.com</text>
+          <text class="contact-action">复制</text>
+        </view>
+      </view>
+      <view class="contact-item" bindtap="onCopyWechat">
+        <view class="contact-left">
+          <text class="contact-icon">💬</text>
+          <text class="contact-text">微信</text>
+        </view>
+        <view class="contact-right">
+          <text class="contact-value">hotai_support</text>
+          <text class="contact-action">复制</text>
+        </view>
+      </view>
+      <view class="contact-item" bindtap="onCallPhone">
+        <view class="contact-left">
+          <text class="contact-icon">📱</text>
+          <text class="contact-text">客服电话</text>
+        </view>
+        <view class="contact-right">
+          <text class="contact-value">400-123-4567</text>
+          <text class="contact-action">拨打</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 法律信息 -->
+  <view class="section">
+    <view class="section-title">法律信息</view>
+    <view class="legal-list">
+      <view class="legal-item" bindtap="onUserAgreement">
+        <text class="legal-text">用户协议</text>
+        <text class="legal-arrow">›</text>
+      </view>
+      <view class="legal-item" bindtap="onPrivacyPolicy">
+        <text class="legal-text">隐私政策</text>
+        <text class="legal-arrow">›</text>
+      </view>
+      <view class="legal-item" bindtap="onCommunityRules">
+        <text class="legal-text">社区规范</text>
+        <text class="legal-arrow">›</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 版权信息 -->
+  <view class="copyright">
+    <text class="copyright-text">© 2024 火泰内容 All Rights Reserved</text>
+    <text class="copyright-text">浙ICP备2024XXXXXX号</text>
+  </view>
+
+  <!-- 反馈按钮 -->
+  <view class="feedback-btn" bindtap="onFeedback">
+    <text class="feedback-icon">💡</text>
+    <text class="feedback-text">意见反馈</text>
+  </view>
+</view>

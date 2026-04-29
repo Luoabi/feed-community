@@ -1,0 +1,54 @@
+<view class="container">
+  <view class="login-box">
+    <view class="logo-container">
+      <image class="logo" src="/images/logo.svg" mode="aspectFit"/>
+      <text class="app-name">火泰内容</text>
+    </view>
+
+    <view class="form-container">
+      <view class="input-group">
+        <text class="input-label">用户名</text>
+        <input 
+          class="input" 
+          placeholder="请输入用户名" 
+          value="{{username}}"
+          bindinput="onUsernameInput"
+        />
+      </view>
+
+      <view class="input-group">
+        <text class="input-label">密码</text>
+        <input 
+          class="input" 
+          type="password"
+          placeholder="请输入密码" 
+          value="{{password}}"
+          bindinput="onPasswordInput"
+        />
+      </view>
+
+      <button 
+        class="login-btn" 
+        bindtap="onLogin"
+        disabled="{{logging}}"
+      >
+        {{logging ? '登录中...' : '登录'}}
+      </button>
+
+      <button 
+        class="quick-login-btn" 
+        bindtap="onQuickLogin"
+      >
+        快速登录（测试）
+      </button>
+
+      <view class="register-link">
+        <text class="register-text" bindtap="onRegister">还没有账号？立即注册</text>
+      </view>
+    </view>
+
+    <view class="tips">
+      <text class="tip-text">测试账号：admin / admin123</text>
+    </view>
+  </view>
+</view>
