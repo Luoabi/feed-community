@@ -2,12 +2,16 @@ package org.xingchang.brapi.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.xingchang.brapi.common.PageResult;
 import org.xingchang.brapi.common.Result;
+import org.xingchang.brapi.entity.Content;
+import org.xingchang.brapi.service.PersonalizedFeedService;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Tag(name = "Feed流管理")
@@ -15,14 +19,29 @@ import java.util.Map;
 @RequestMapping("/feed")
 public class FeedController {
     
+    @Autowired
+    private PersonalizedFeedService personalizedFeedService;
+    
+    @Operation(summary = "获取个性化Feed流")
+    @GetMapping("/personalized")
+    public Result<PageResult<Content>> getPersonalizedFeed(
+        @RequestParam Long userId,
+        @RequestParam(defaultValue = "1") Integer page,
+        @RequestParam(defaultValue = "20") Integer size
+    ) {
+        List<Content> contents = personalizedFeedService.getPersonalizedFeed(userId, page, size);
+        return Result.success(PageResult.of((long) contents.size(), contents));
+    }
+    
     @Operation(summary = "获取配置")
     @GetMapping("/config")
     public Result<Map<String, Object>> getConfig() {
         Map<String, Object> config = new HashMap<>();
-        config.put("algorithm", "hot");
-        config.put("hotWeight", 0.4);
-        config.put("timeWeight", 0.3);
-        config.put("interactionWeight", 0.3);
+        config.put("algorithm", "personalized");
+        config.put("hotWeight", 0.3);
+        config.put("timeWeight", 0.15);
+        config.put("interestWeight", 0.5);
+        config.put("qualityWeight", 0.05);
         config.put("refreshInterval", 300);
         config.put("cacheTime", 3600);
         return Result.success(config);

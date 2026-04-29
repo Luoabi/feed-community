@@ -62,14 +62,15 @@
       </view>
     </view>
 
-    <!-- 分类选择 -->
-    <view class="input-section" wx:if="{{categories.length > 0}}">
+    <!-- 分类选择（可选） -->
+    <view class="input-section">
       <view class="section-label">
         <text class="label-icon">📂</text>
         <text class="label-text">选择分类</text>
         <text class="optional-tag">选填</text>
       </view>
       <picker 
+        wx:if="{{categories.length > 0}}"
         mode="selector" 
         range="{{categories}}" 
         range-key="categoryName"
@@ -82,6 +83,9 @@
           <text class="picker-arrow">›</text>
         </view>
       </picker>
+      <view wx:else class="picker-display disabled">
+        <text class="placeholder">暂无分类（可不选）</text>
+      </view>
     </view>
 
     <!-- 标题输入 -->

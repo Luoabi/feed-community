@@ -1,5 +1,6 @@
 package org.xingchang.brapi.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -24,9 +25,19 @@ public class CategoryController {
     
     @Operation(summary = "分类列表")
     @GetMapping("/list")
-    public Result<List<ContentCategory>> list() {
-        List<ContentCategory> result = categoryMapper.selectList(null);
-        return Result.success(result);
+    public Result<Map<String, Object>> list() {
+        // ✅ 只查询启用的分类，按排序字段排序
+        List<ContentCategory> result = categoryMapper.selectList(
+            new LambdaQueryWrapper<ContentCategory>()
+                .eq(ContentCategory::getStatus, 1)  // 只查询启用的
+                .orderByAsc(ContentCategory::getSort)  // 按排序字段排序
+        );
+        
+        // ✅ 返回格式与前端期望一致
+        return Result.success(Map.of(
+            "list", result,
+            "total", result.size()
+        ));
     }
     
     @Operation(summary = "分类详情")

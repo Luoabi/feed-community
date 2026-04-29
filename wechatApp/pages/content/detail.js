@@ -1,5 +1,6 @@
 const api = require('../../api/index.js')
 const { handleImageUrl, handleImageList } = require('../../utils/image.js')
+const behaviorTracker = require('../../utils/behaviorTracker.js')
 
 Page({
   data: {
@@ -17,7 +18,20 @@ Page({
       this.loadContentDetail()
       this.loadComments()
       this.checkInteractionStatus()
+      
+      // ✅ 开始记录浏览行为
+      behaviorTracker.startView(options.id)
     }
+  },
+  
+  // ✅ 页面卸载时记录浏览结束
+  onUnload() {
+    behaviorTracker.endView('detail')
+  },
+  
+  // ✅ 页面隐藏时记录浏览结束
+  onHide() {
+    behaviorTracker.endView('detail')
   },
 
   async checkInteractionStatus() {

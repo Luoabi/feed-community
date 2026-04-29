@@ -79,6 +79,14 @@ public class WebConfig implements WebMvcConfigurer {
                         "/api/feed/**",
                         "/feed/**",
                         
+                        // 用户行为追踪（无需登录，支持匿名用户）
+                        "/api/behavior/**",
+                        "/behavior/**",
+                        
+                        // 用户兴趣画像（部分接口公开）
+                        "/api/interest/user/*/top",
+                        "/interest/user/*/top",
+                        
                         // ==================== 文件上传（需要登录）====================
                         // 注意：文件上传需要登录，所以不在排除列表中
                         

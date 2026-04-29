@@ -19,6 +19,9 @@ module.exports = {
     isFeed: true  // ✅ 标记为Feed流，启用推荐算法
   }),
   
+  // ✅ 个性化Feed流（基于用户兴趣）
+  getPersonalizedFeed: (params) => request.get('/feed/personalized', params),
+  
   // 社区帖子列表 - 只显示用户发布的帖子类型内容
   // 查询条件：content_type='post' AND content_source='user' AND status='published' AND deleted=0
   getPostList: (params) => request.get('/content/list', {
@@ -153,5 +156,27 @@ module.exports = {
   // ==================== 统计相关 ====================
   
   // 统计数据
-  getDashboardStats: () => request.get('/dashboard/stats')
+  getDashboardStats: () => request.get('/dashboard/stats'),
+  
+  // ==================== 用户兴趣相关 ====================
+  
+  // 获取用户兴趣标签
+  getUserInterests: (userId) => request.get(`/interest/user/${userId}`),
+  
+  // 获取用户Top N兴趣标签
+  getTopInterests: (userId, topN = 5) => request.get(`/interest/user/${userId}/top`, { topN }),
+  
+  // 设置用户兴趣（冷启动）
+  setUserInterests: (userId, tagIds) => request.post(`/interest/user/${userId}/set`, { tagIds }),
+  
+  // ==================== 行为追踪相关 ====================
+  
+  // 记录用户行为
+  trackBehavior: (data) => request.post('/behavior/track', data),
+  
+  // 记录浏览行为
+  trackView: (data) => request.post('/behavior/view', data),
+  
+  // 记录点击行为
+  trackClick: (data) => request.post('/behavior/click', data)
 }

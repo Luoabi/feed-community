@@ -24,9 +24,15 @@ public class TagController {
     
     @Operation(summary = "标签列表")
     @GetMapping("/list")
-    public Result<List<org.xingchang.brapi.entity.Tag>> list() {
-        List<org.xingchang.brapi.entity.Tag> result = tagService.getList(null, null);
-        return Result.success(result);
+    public Result<Map<String, Object>> list() {
+        // ✅ 只查询启用的标签
+        List<org.xingchang.brapi.entity.Tag> result = tagService.getList(null, 1);
+        
+        // ✅ 返回格式与前端期望一致
+        return Result.success(Map.of(
+            "list", result,
+            "total", result.size()
+        ));
     }
     
     @Operation(summary = "标签详情")

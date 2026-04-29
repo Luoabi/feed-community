@@ -359,3 +359,94 @@ CREATE TABLE IF NOT EXISTS user_tag (
     INDEX idx_tag_id (tag_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户标签关联表';
 
+
+
+-- ==================== 个性化推荐系统表 ====================
+
+-- 用户行为日志表
+CREATE TABLE IF NOT EXISTS user_behavior_log (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',
+    user_id BIGINT NOT NULL COMMENT '用户ID',
+    content_id BIGINT NOT NULL COMMENT '内容ID',
+    action_type VARCHAR(20) NOT NULL COMMENT '行为类型：view/click/like/collect/share/comment',
+    duration INT DEFAULT 0 COMMENT '停留时长(秒)',
+    source VARCHAR(50) COMMENT '来源：feed/search/profile/detail',
+    ip VARCHAR(50) COMMENT 'IP地址',
+    device VARCHAR(50) COMMENT '设备信息',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    INDEX idx_user_id (user_id),
+    INDEX idx_content_id (content_id),
+    INDEX idx_action_type (action_type),
+    INDEX idx_create_time (create_time)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户行为日志表';
+
+-- 用户兴趣画像表
+CREATE TABLE IF NOT EXISTS user_interest_profile (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',
+    user_id BIGINT NOT NULL COMMENT '用户ID',
+    tag_id BIGINT NOT NULL COMMENT '标签ID',
+    tag_name VARCHAR(50) NOT NULL COMMENT '标签名称',
+    interest_score DOUBLE DEFAULT 0 COMMENT '兴趣分数(0-100)',
+    view_count INT DEFAULT 0 COMMENT '浏览次数',
+    like_count INT DEFAULT 0 COMMENT '点赞次数',
+    collect_count INT DEFAULT 0 COMMENT '收藏次数',
+    comment_count INT DEFAULT 0 COMMENT '评论次数',
+    share_count INT DEFAULT 0 COMMENT '分享次数',
+    last_active_time DATETIME COMMENT '最后活跃时间',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    UNIQUE KEY uk_user_tag (user_id, tag_id),
+    INDEX idx_user_id (user_id),
+    INDEX idx_tag_id (tag_id),
+    INDEX idx_interest_score (interest_score DESC)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户兴趣画像表';
+
+-- 内容标签关联表
+CREATE TABLE IF NOT EXISTS content_tag (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',
+    content_id BIGINT NOT NULL COMMENT '内容ID',
+    tag_id BIGINT NOT NULL COMMENT '标签ID',
+    tag_name VARCHAR(50) NOT NULL COMMENT '标签名称',
+    weight DOUBLE DEFAULT 1.0 COMMENT '标签权重(0-1)',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    UNIQUE KEY uk_content_tag (content_id, tag_id),
+    INDEX idx_content_id (content_id),
+    INDEX idx_tag_id (tag_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='内容标签关联表';
+
+-- 用户个性化Feed流表
+CREATE TABLE IF NOT EXISTS user_feed (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',
+    user_id BIGINT NOT NULL COMMENT '用户ID',
+    content_id BIGINT NOT NULL COMMENT '内容ID',
+    score DOUBLE DEFAULT 0 COMMENT '推荐分数',
+    reason VARCHAR(200) COMMENT '推荐理由',
+    position INT COMMENT '推荐位置',
+    is_viewed TINYINT DEFAULT 0 COMMENT '是否已浏览：0否 1是',
+    is_clicked TINYINT DEFAULT 0 COMMENT '是否已点击：0否 1是',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    expire_time DATETIME COMMENT '过期时间',
+    INDEX idx_user_id (user_id),
+    INDEX idx_content_id (content_id),
+    INDEX idx_score (score DESC),
+    INDEX idx_create_time (create_time),
+    INDEX idx_expire_time (expire_time)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户个性化Feed流表';
+
+-- 推荐效果统计表
+CREATE TABLE IF NOT EXISTS recommendation_stats (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',
+    stat_date DATE NOT NULL COMMENT '统计日期',
+    algorithm VARCHAR(50) COMMENT '算法类型：hot/personalized/collaborative',
+    total_recommend INT DEFAULT 0 COMMENT '推荐总数',
+    total_view INT DEFAULT 0 COMMENT '浏览总数',
+    total_click INT DEFAULT 0 COMMENT '点击总数',
+    total_like INT DEFAULT 0 COMMENT '点赞总数',
+    ctr DOUBLE DEFAULT 0 COMMENT '点击率',
+    avg_duration DOUBLE DEFAULT 0 COMMENT '平均停留时长(秒)',
+    coverage_rate DOUBLE DEFAULT 0 COMMENT '内容覆盖率',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    UNIQUE KEY uk_date_algorithm (stat_date, algorithm),
+    INDEX idx_stat_date (stat_date)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='推荐效果统计表';

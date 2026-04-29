@@ -24,23 +24,47 @@ Page({
 
   async loadCategories() {
     try {
+      console.log('开始加载分类...')
       const res = await api.getCategoryList()
+      console.log('分类接口返回:', res)
+      
       if (res.data && res.data.list) {
+        console.log('分类列表:', res.data.list)
+        console.log('分类数量:', res.data.list.length)
         this.setData({ categories: res.data.list })
+      } else {
+        console.warn('分类数据格式异常:', res)
+        this.setData({ categories: [] })
       }
     } catch (e) {
       console.error('加载分类失败', e)
+      wx.showToast({
+        title: '加载分类失败',
+        icon: 'none'
+      })
     }
   },
 
   async loadTags() {
     try {
+      console.log('开始加载标签...')
       const res = await api.getTagList()
+      console.log('标签接口返回:', res)
+      
       if (res.data && res.data.list) {
+        console.log('标签列表:', res.data.list)
+        console.log('标签数量:', res.data.list.length)
         this.setData({ tags: res.data.list })
+      } else {
+        console.warn('标签数据格式异常:', res)
+        this.setData({ tags: [] })
       }
     } catch (e) {
       console.error('加载标签失败', e)
+      wx.showToast({
+        title: '加载标签失败',
+        icon: 'none'
+      })
     }
   },
 

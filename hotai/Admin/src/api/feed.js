@@ -4,6 +4,9 @@ import request from './request'
  * Feed流管理API
  */
 export default {
+  // 获取个性化Feed流
+  getPersonalizedFeed: (params) => request.get('/feed/personalized', { params }),
+  
   // 获取配置
   getFeedConfig: () => request.get('/feed/config'),
   

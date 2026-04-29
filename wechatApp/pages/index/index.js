@@ -1,5 +1,6 @@
 const api = require('../../api/index.js')
 const { handleImageUrl, handleImageList } = require('../../utils/image.js')
+const behaviorTracker = require('../../utils/behaviorTracker.js')
 
 Page({
   data: {
@@ -10,12 +11,25 @@ Page({
     size: 10,
     loading: false,
     hasMore: true,
-    currentPlayingVideoId: null // 当前正在播放的视频ID
+    currentPlayingVideoId: null, // 当前正在播放的视频ID
+    usePersonalized: false // 是否使用个性化推荐
   },
 
   onLoad() {
+    this.checkPersonalizedMode()
     this.loadCategories()
     this.loadContents()
+  },
+  
+  // ✅ 检查是否使用个性化推荐
+  checkPersonalizedMode() {
+    const userInfo = wx.getStorageSync('userInfo')
+    if (userInfo && userInfo.id) {
+      this.setData({ usePersonalized: true })
+      console.log('使用个性化推荐模式')
+    } else {
+      console.log('使用热门推荐模式（未登录）')
+    }
   },
   
   // ✅ 页面显示时刷新数据（从详情页返回时）
@@ -92,17 +106,32 @@ Page({
     
     this.setData({ loading: true })
     try {
-      const params = {
-        page: this.data.page,
-        size: this.data.size
-        // status='published', deleted=0, isFeed=true 已在 api.getFeedList 中自动添加
-      }
-      if (this.data.currentCategory && this.data.currentCategory.id) {
-        params.categoryId = this.data.currentCategory.id
+      const userInfo = wx.getStorageSync('userInfo')
+      
+      // ✅ 根据登录状态选择推荐模式
+      let res
+      if (this.data.usePersonalized && userInfo && userInfo.id) {
+        // 个性化推荐
+        const params = {
+          userId: userInfo.id,
+          page: this.data.page,
+          size: this.data.size
+        }
+        res = await api.getPersonalizedFeed(params)
+        console.log('使用个性化推荐')
+      } else {
+        // 热门推荐（未登录或无兴趣画像）
+        const params = {
+          page: this.data.page,
+          size: this.data.size
+        }
+        if (this.data.currentCategory && this.data.currentCategory.id) {
+          params.categoryId = this.data.currentCategory.id
+        }
+        res = await api.getFeedList(params)
+        console.log('使用热门推荐')
       }
       
-      // ✅ 使用 getFeedList - 获取所有已发布的内容（推荐算法排序）
-      const res = await api.getFeedList(params)
       if (res.data) {
         // 处理图片 URL 和时间格式
         const list = res.data.list.map(item => {
@@ -197,6 +226,10 @@ Page({
 
   onContentTap(e) {
     const id = e.currentTarget.dataset.id
+    
+    // ✅ 记录点击行为
+    behaviorTracker.trackClick(id, 'feed')
+    
     // 暂停当前播放的视频
     if (this.data.currentPlayingVideoId) {
       const videoContext = wx.createVideoContext(`video-${this.data.currentPlayingVideoId}`, this)

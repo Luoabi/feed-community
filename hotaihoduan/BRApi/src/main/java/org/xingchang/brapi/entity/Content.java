@@ -58,6 +58,7 @@ public class Content {
     private Integer isEssence;  // 新增：是否精华
     private Integer isHot;
     private Integer isRecommend;
+    private Double hotScore;  // 新增：热度分数
     
     // 其他
     private String tags;
