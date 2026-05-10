@@ -1,7 +1,10 @@
 package org.xingchang.brapi.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.xingchang.brapi.entity.Content;
 import org.xingchang.brapi.entity.UserBehaviorLog;
@@ -28,6 +31,11 @@ public class PersonalizedFeedService {
     
     @Autowired
     private UserBehaviorLogMapper behaviorLogMapper;
+    
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+    
+    private static final ObjectMapper objectMapper = new ObjectMapper();
     
     /**
      * 获取个性化Feed流
@@ -66,13 +74,46 @@ public class PersonalizedFeedService {
         }
         
         // 4. 排序 + 去重 + 多样性 + 分页
-        return scoredContents.stream()
+        List<Content> result = scoredContents.stream()
                 .sorted(Comparator.comparing(ContentWithScore::getScore).reversed())
                 .map(ContentWithScore::getContent)
                 .filter(c -> !hasUserViewed(userId, c.getId())) // 去重：过滤已浏览的
                 .skip((long) (page - 1) * size)
                 .limit(size)
                 .collect(Collectors.toList());
+        
+        // ✅ 手动处理 images 字段（与ContentService保持一致）
+        processImagesField(result);
+        
+        return result;
+    }
+    
+    /**
+     * 手动处理 images 字段
+     */
+    private void processImagesField(List<Content> contents) {
+        for (Content content : contents) {
+            if (content.getImages() == null && content.getId() != null) {
+                try {
+                    String imagesJson = jdbcTemplate.queryForObject(
+                        "SELECT images FROM content WHERE id = ?",
+                        String.class,
+                        content.getId()
+                    );
+                    
+                    if (imagesJson != null && !imagesJson.trim().isEmpty()) {
+                        List<String> imagesList = objectMapper.readValue(
+                            imagesJson, 
+                            new TypeReference<List<String>>() {}
+                        );
+                        content.setImages(imagesList);
+                    }
+                } catch (Exception e) {
+                    System.err.println("❌ 个性化推荐 - 解析 images 失败 - ID: " + content.getId() + ", error: " + e.getMessage());
+                    content.setImages(new ArrayList<>());
+                }
+            }
+        }
     }
     
     /**
@@ -198,7 +239,7 @@ public class PersonalizedFeedService {
      * 获取热门内容（冷启动）
      */
     private List<Content> getHotContents(int page, int size) {
-        return contentMapper.selectList(
+        List<Content> result = contentMapper.selectList(
             new LambdaQueryWrapper<Content>()
                 .eq(Content::getStatus, "published")
                 .eq(Content::getDeleted, 0)
@@ -210,6 +251,11 @@ public class PersonalizedFeedService {
                 .orderByDesc(Content::getPublishTime)
                 .last("LIMIT " + ((page - 1) * size) + ", " + size)
         );
+        
+        // ✅ 手动处理 images 字段
+        processImagesField(result);
+        
+        return result;
     }
     
     /**

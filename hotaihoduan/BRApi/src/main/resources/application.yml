@@ -81,7 +81,10 @@ jwt:
 file:
   upload:
     path: uploads
-    domain: http://localhost:8080/api
+    # ✅ 修改为你的局域网IP，这样小程序才能访问
+    # 格式：http://你的IP:8080/api
+    # 例如：http://192.168.1.100:8080/api
+#    domain: http://192.168.1.100:8080/api
 
 # 日志配置
 logging:

@@ -25,6 +25,7 @@ public class ContentController {
     public Result<PageResult<Content>> list(@RequestParam Map<String, Object> params) {
         return Result.success(contentService.getList(params));
     }
+
     
     @Operation(summary = "内容详情")
     @GetMapping("/detail/{id}")
@@ -132,7 +133,8 @@ public class ContentController {
     @PutMapping("/toggleTop")
     public Result<Void> toggleTop(@RequestBody Map<String, Object> params) {
         Long id = Long.valueOf(params.get("id").toString());
-        Integer isTop = (Integer) params.get("isTop");
+        Object isTopObj = params.get("isTop");
+        Integer isTop = convertToInteger(isTopObj);
         return contentService.toggleTop(id, isTop) ? Result.success() : Result.error();
     }
     
@@ -140,8 +142,25 @@ public class ContentController {
     @PutMapping("/toggleRecommend")
     public Result<Void> toggleRecommend(@RequestBody Map<String, Object> params) {
         Long id = Long.valueOf(params.get("id").toString());
-        Integer isRecommend = (Integer) params.get("isRecommend");
+        Object isRecommendObj = params.get("isRecommend");
+        Integer isRecommend = convertToInteger(isRecommendObj);
         return contentService.toggleRecommend(id, isRecommend) ? Result.success() : Result.error();
+    }
+    
+    private Integer convertToInteger(Object value) {
+        if (value == null) return 0;
+        if (value instanceof Integer) return (Integer) value;
+        if (value instanceof Boolean) return (Boolean) value ? 1 : 0;
+        if (value instanceof String) {
+            String str = (String) value;
+            if ("true".equalsIgnoreCase(str) || "1".equals(str)) return 1;
+            return 0;
+        }
+        try {
+            return Integer.valueOf(value.toString());
+        } catch (NumberFormatException e) {
+            return 0;
+        }
     }
     
     @Operation(summary = "通过审核")

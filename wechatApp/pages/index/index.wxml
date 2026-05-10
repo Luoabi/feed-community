@@ -33,7 +33,7 @@
         </view>
         <view class="content-info">
           <view class="content-title">{{item.title}}</view>
-          <view class="content-summary" wx:if="{{item.summary}}">{{item.summary}}</view>
+          <view class="content-summary" wx:if="{{item.summary || item.content}}">{{item.summary || item.content}}</view>
           <view class="content-footer">
             <view class="author-section">
               <image class="author-avatar" src="{{item.authorAvatar || '/images/default-avatar.svg'}}" mode="aspectFill"></image>
@@ -57,24 +57,18 @@
       <block wx:elif="{{item.contentType === 'image'}}">
         <view class="image-grid">
           <view class="content-type-badge">🖼️ 图片</view>
+          <!-- ✅ 首页只显示第一张图片作为封面 -->
           <image 
-            wx:if="{{item.images && item.images.length === 1}}" 
+            wx:if="{{item.images && item.images.length > 0}}" 
             src="{{item.images[0]}}" 
             mode="aspectFill" 
             class="single-image"
             lazy-load
           ></image>
-          <view wx:elif="{{item.images && item.images.length > 1}}" class="multi-images">
-            <image 
-              wx:for="{{item.images.slice(0, 3)}}" 
-              wx:key="index"
-              wx:for-item="img"
-              src="{{img}}" 
-              mode="aspectFill" 
-              class="grid-image"
-              lazy-load
-            ></image>
-            <view wx:if="{{item.images.length > 3}}" class="more-images">+{{item.images.length - 3}}</view>
+          <!-- ✅ 如果有多张图片，显示数量角标 -->
+          <view wx:if="{{item.images && item.images.length > 1}}" class="image-count-badge">
+            <text class="badge-icon">🖼️</text>
+            <text class="badge-text">{{item.images.length}}</text>
           </view>
         </view>
         <view class="content-info">
@@ -115,6 +109,9 @@
               show-fullscreen-btn="{{true}}"
               show-progress="{{true}}"
               enable-progress-gesture="{{true}}"
+              autoplay="{{false}}"
+              loop="{{false}}"
+              muted="{{false}}"
               class="video-player"
               bindplay="onVideoPlay"
               bindpause="onVideoPause"
@@ -133,7 +130,7 @@
           <!-- 视频信息区域可点击跳转详情 -->
           <view class="content-info" bindtap="onContentTap" data-id="{{item.id}}">
             <view class="content-title">{{item.title}}</view>
-            <view class="content-summary" wx:if="{{item.summary}}">{{item.summary}}</view>
+            <view class="content-summary" wx:if="{{item.summary || item.content}}">{{item.summary || item.content}}</view>
             <view class="content-footer">
               <view class="author-section">
                 <image class="author-avatar" src="{{item.authorAvatar || '/images/default-avatar.svg'}}" mode="aspectFill"></image>
@@ -156,14 +153,14 @@
 
       <!-- 链接类型 -->
       <block wx:elif="{{item.linkUrl}}">
-        <view class="link-preview">
+        <!-- <view class="link-preview">
           <view class="content-type-badge">🔗 链接</view>
           <image wx:if="{{item.coverImage}}" src="{{item.coverImage}}" mode="aspectFill" class="link-thumb" lazy-load></image>
           <view class="link-icon" wx:else>🌐</view>
-        </view>
+        </view> -->
         <view class="content-info content-info-link">
           <view class="content-title">{{item.title}}</view>
-          <view class="content-summary" wx:if="{{item.summary}}">{{item.summary}}</view>
+          <view class="content-summary" wx:if="{{item.summary || item.content}}">{{item.summary || item.content}}</view>
           <view class="link-url-display">
             <text class="link-url-icon">🔗</text>
             <text class="link-url-text">{{item.linkUrl}}</text>

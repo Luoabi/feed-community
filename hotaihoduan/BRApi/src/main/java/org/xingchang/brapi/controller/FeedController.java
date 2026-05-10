@@ -24,13 +24,21 @@ public class FeedController {
     
     @Operation(summary = "获取个性化Feed流")
     @GetMapping("/personalized")
-    public Result<PageResult<Content>> getPersonalizedFeed(
+    public Result<Map<String, Object>> getPersonalizedFeed(
         @RequestParam Long userId,
         @RequestParam(defaultValue = "1") Integer page,
         @RequestParam(defaultValue = "20") Integer size
     ) {
         List<Content> contents = personalizedFeedService.getPersonalizedFeed(userId, page, size);
-        return Result.success(PageResult.of((long) contents.size(), contents));
+        
+        // ✅ 返回格式与 /content/list 保持一致
+        Map<String, Object> result = new HashMap<>();
+        result.put("list", contents);
+        result.put("total", contents.size());
+        result.put("page", page);
+        result.put("size", size);
+        
+        return Result.success(result);
     }
     
     @Operation(summary = "获取配置")

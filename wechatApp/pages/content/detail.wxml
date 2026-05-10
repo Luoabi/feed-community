@@ -1,6 +1,7 @@
 <view class="container">
   <view class="content-detail" wx:if="{{content}}">
     <!-- 内容标题 -->
+    {{content}}
     <view class="content-title">{{content.title}}</view>
 
     <!-- 作者信息 -->
@@ -136,12 +137,20 @@
 
   <!-- 评论输入框 -->
   <view class="comment-input-bar">
-    <input 
-      class="comment-input" 
-      placeholder="说点什么..." 
-      value="{{commentText}}"
-      bindinput="onCommentInput"
-    />
-    <button class="send-btn" bindtap="onSendComment">发送</button>
+    <view class="input-wrapper">
+      <textarea 
+        class="comment-input" 
+        placeholder="说点什么..." 
+        value="{{commentText}}"
+        bindinput="onCommentInput"
+        placeholder-class="input-placeholder"
+        auto-height
+        max-length="500"
+        confirm-type="send"
+        show-confirm-bar="{{false}}"
+      />
+      <view class="char-count" wx:if="{{commentText.length > 0}}">{{commentText.length}}/500</view>
+    </view>
+    <button class="send-btn {{commentText.trim() ? 'active' : 'disabled'}}" bindtap="onSendComment">发送</button>
   </view>
 </view>

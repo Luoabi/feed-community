@@ -93,7 +93,9 @@ Page({
     try {
       const res = await api.getCategoryList()
       if (res.data && res.data.list) {
-        const categories = [{ id: null, categoryName: '全部' }, ...res.data.list]
+        // 按照 categoryId 排序
+        const sortedCategories = res.data.list.sort((a, b) => a.id - b.id)
+        const categories = [{ id: null, categoryName: '全部' }, ...sortedCategories]
         this.setData({ categories, currentCategory: categories[0] })
       }
     } catch (e) {
@@ -108,10 +110,19 @@ Page({
     try {
       const userInfo = wx.getStorageSync('userInfo')
       
-      // ✅ 根据登录状态选择推荐模式
+      // ✅ 优先检查是否选择了分类，如果有分类则使用分类筛选
       let res
-      if (this.data.usePersonalized && userInfo && userInfo.id) {
-        // 个性化推荐
+      if (this.data.currentCategory && this.data.currentCategory.id) {
+        // 有分类选择，使用分类筛选
+        const params = {
+          page: this.data.page,
+          size: this.data.size,
+          categoryId: this.data.currentCategory.id
+        }
+        res = await api.getFeedList(params)
+        console.log(`使用分类筛选: ${this.data.currentCategory.categoryName}`)
+      } else if (this.data.usePersonalized && userInfo && userInfo.id) {
+        // 个性化推荐（仅在未选择分类时）
         const params = {
           userId: userInfo.id,
           page: this.data.page,
@@ -124,9 +135,6 @@ Page({
         const params = {
           page: this.data.page,
           size: this.data.size
-        }
-        if (this.data.currentCategory && this.data.currentCategory.id) {
-          params.categoryId = this.data.currentCategory.id
         }
         res = await api.getFeedList(params)
         console.log('使用热门推荐')
@@ -175,16 +183,33 @@ Page({
     try {
       const currentPage = this.data.page
       const totalSize = this.data.size * currentPage
+      const userInfo = wx.getStorageSync('userInfo')
       
-      const params = {
-        page: 1,
-        size: totalSize  // 获取当前所有页的数据
-      }
+      let res
       if (this.data.currentCategory && this.data.currentCategory.id) {
-        params.categoryId = this.data.currentCategory.id
+        // 有分类选择，使用分类筛选
+        const params = {
+          page: 1,
+          size: totalSize,
+          categoryId: this.data.currentCategory.id
+        }
+        res = await api.getFeedList(params)
+      } else if (this.data.usePersonalized && userInfo && userInfo.id) {
+        // 个性化推荐
+        const params = {
+          userId: userInfo.id,
+          page: 1,
+          size: totalSize
+        }
+        res = await api.getPersonalizedFeed(params)
+      } else {
+        // 热门推荐
+        const params = {
+          page: 1,
+          size: totalSize
+        }
+        res = await api.getFeedList(params)
       }
-      
-      const res = await api.getFeedList(params)
       if (res.data && res.data.list) {
         // 处理图片 URL
         const list = res.data.list.map(item => ({
