@@ -49,13 +49,10 @@ public class PersonalizedFeedService {
             return getHotContents(page, size);
         }
         
-        // 2. 获取候选内容（最近7天的已发布内容）
-        LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
+        // 2. 获取候选内容（所有已发布内容）
         List<Content> candidates = contentMapper.selectList(
             new LambdaQueryWrapper<Content>()
                 .eq(Content::getStatus, "published")
-                .eq(Content::getDeleted, 0)
-                .ge(Content::getPublishTime, sevenDaysAgo)
                 .orderByDesc(Content::getPublishTime)
                 .last("LIMIT 500") // 候选池最多500条
         );
@@ -242,7 +239,6 @@ public class PersonalizedFeedService {
         List<Content> result = contentMapper.selectList(
             new LambdaQueryWrapper<Content>()
                 .eq(Content::getStatus, "published")
-                .eq(Content::getDeleted, 0)
                 .orderByDesc(Content::getIsTop)
                 .orderByDesc(Content::getIsRecommend)
                 .orderByDesc(Content::getIsHot)

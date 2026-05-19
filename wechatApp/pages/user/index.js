@@ -156,6 +156,7 @@ Page({
       success: (res) => {
         if (res.confirm) {
           wx.removeStorageSync('token')
+          wx.removeStorageSync('userInfo')
           app.globalData.isLogin = false
           app.globalData.userInfo = null
           this.setData({ 

@@ -258,8 +258,8 @@ const configForm = reactive({
 })
 
 const cacheInfo = reactive({
-  count: 1250,
-  size: 45.6,
+  count: 0,
+  size: 0,
   lastUpdate: new Date().toLocaleString()
 })
 
@@ -308,6 +308,19 @@ const loadData = async () => {
   }
 }
 
+const loadStats = async () => {
+  try {
+    const res = await feedApi.getFeedStats()
+    if (res.data) {
+      cacheInfo.count = res.data.totalContent || 0
+      cacheInfo.size = res.data.cacheSize || 0
+      cacheInfo.lastUpdate = new Date().toLocaleString()
+    }
+  } catch (error) {
+    console.error('加载统计失败:', error)
+  }
+}
+
 const getContentTypeTag = (type) => {
   const map = {
     post: '',
@@ -349,16 +362,16 @@ const handleResetConfig = () => {
   ElMessage.info('配置已重置')
 }
 
-const handleRefreshCache = () => {
+const handleRefreshCache = async () => {
   ElMessageBox.confirm('确定要刷新Feed流缓存吗？', '提示', {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
     type: 'warning'
   }).then(async () => {
     try {
-      await feedApi.getFeedStats()
+      await loadStats()
+      await loadData()
       Logger.update('Feed流管理', '刷新Feed流缓存', {})
-      cacheInfo.lastUpdate = new Date().toLocaleString()
       ElMessage.success('缓存刷新成功')
     } catch (error) {
       ElMessage.error('刷新缓存失败')
@@ -400,20 +413,29 @@ const handleAdjustScore = (row) => {
   scoreVisible.value = true
 }
 
-const handleScoreSubmit = () => {
+const handleScoreSubmit = async () => {
   if (!scoreForm.reason) {
     ElMessage.warning('请输入调整原因')
     return
   }
-  currentRow.value.hotScore = scoreForm.newScore
-  Logger.update('Feed流管理', `调整热度分数: ${currentRow.value.title}`, {
-    id: currentRow.value.id,
-    oldScore: scoreForm.currentScore,
-    newScore: scoreForm.newScore,
-    reason: scoreForm.reason
-  })
-  ElMessage.success('分数调整成功')
-  scoreVisible.value = false
+  try {
+    await feedApi.updateHotScore({
+      contentId: currentRow.value.id,
+      hotScore: scoreForm.newScore
+    })
+    currentRow.value.hotScore = scoreForm.newScore
+    Logger.update('Feed流管理', `调整热度分数: ${currentRow.value.title}`, {
+      id: currentRow.value.id,
+      oldScore: scoreForm.currentScore,
+      newScore: scoreForm.newScore,
+      reason: scoreForm.reason
+    })
+    ElMessage.success('分数调整成功')
+    scoreVisible.value = false
+  } catch (error) {
+    ElMessage.error('分数调整失败')
+    console.error('调整热度分数失败:', error)
+  }
 }
 
 const handleRemove = (row) => {
@@ -461,6 +483,7 @@ const handlePushSubmit = async () => {
 
 onMounted(() => {
   loadData()
+  loadStats()
 })
 </script>
 

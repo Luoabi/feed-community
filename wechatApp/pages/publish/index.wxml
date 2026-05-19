@@ -194,22 +194,58 @@
     </view>
 
     <!-- 标签选择 -->
-    <view class="tag-section" wx:if="{{tags.length > 0}}">
+    <view class="tag-section">
       <view class="section-label">
         <text class="label-icon">🏷️</text>
         <text class="label-text">添加标签</text>
         <text class="optional-tag">选填</text>
         <text class="tag-count">{{selectedTags.length}}/5</text>
       </view>
-      <view class="tag-list">
+      
+      <!-- 自定义标签输入 -->
+      <view class="tag-input-section">
+        <input 
+          class="tag-input" 
+          placeholder="输入新标签（按回车添加）" 
+          placeholder-class="placeholder"
+          value="{{newTagInput}}"
+          bindinput="onNewTagInput"
+          bindconfirm="onAddCustomTag"
+          maxlength="10"
+        />
+        <view class="add-tag-btn" bindtap="onAddCustomTag">
+          <text class="add-tag-icon">+</text>
+          <text>添加</text>
+        </view>
+      </view>
+      
+      <!-- 已选标签 -->
+      <view class="tag-list" wx:if="{{selectedTags.length > 0}}">
         <view 
-          class="tag-item {{selectedTags.indexOf(item.id) > -1 ? 'selected' : ''}}"
-          wx:for="{{tags}}"
-          wx:key="id"
-          bindtap="onTagToggle"
-          data-id="{{item.id}}"
+          class="tag-item selected"
+          wx:for="{{selectedTags}}"
+          wx:key="*this"
+          bindtap="onRemoveSelectedTag"
+          data-tag="{{item}}"
         >
-          <text class="tag-name">{{item.tagName}}</text>
+          <text class="tag-name">{{item}}</text>
+          <text class="tag-remove">×</text>
+        </view>
+      </view>
+      
+      <!-- 推荐标签（从已有标签中选择） -->
+      <view class="recommend-tags" wx:if="{{tags.length > 0}}">
+        <view class="recommend-title">推荐标签</view>
+        <view class="tag-list">
+          <view 
+            class="tag-item {{selectedTags.indexOf(item.tagName) > -1 ? 'selected hidden' : ''}}"
+            wx:for="{{tags}}"
+            wx:key="id"
+            bindtap="onRecommendTagToggle"
+            data-tag="{{item.tagName}}"
+          >
+            <text class="tag-name">{{item.tagName}}</text>
+          </view>
         </view>
       </view>
     </view>

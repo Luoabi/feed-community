@@ -117,7 +117,8 @@ Page({
         const params = {
           page: this.data.page,
           size: this.data.size,
-          categoryId: this.data.currentCategory.id
+          categoryId: this.data.currentCategory.id,
+          isFeed: true  // 启用推荐算法排序
         }
         res = await api.getFeedList(params)
         console.log(`使用分类筛选: ${this.data.currentCategory.categoryName}`)
@@ -134,7 +135,8 @@ Page({
         // 热门推荐（未登录或无兴趣画像）
         const params = {
           page: this.data.page,
-          size: this.data.size
+          size: this.data.size,
+          isFeed: true  // 启用推荐算法排序
         }
         res = await api.getFeedList(params)
         console.log('使用热门推荐')

@@ -23,5 +23,8 @@ export default {
   pushToFeed: (data) => request.post('/feed/push', data),
   
   // 从Feed移除
-  removeFromFeed: (id) => request.delete(`/feed/remove/${id}`)
+  removeFromFeed: (id) => request.delete(`/feed/remove/${id}`),
+  
+  // 调整热度分数
+  updateHotScore: (data) => request.put('/feed/updateHotScore', data)
 }

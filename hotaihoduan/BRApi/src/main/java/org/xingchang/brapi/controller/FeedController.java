@@ -8,8 +8,8 @@ import org.xingchang.brapi.common.PageResult;
 import org.xingchang.brapi.common.Result;
 import org.xingchang.brapi.entity.Content;
 import org.xingchang.brapi.service.PersonalizedFeedService;
+import org.xingchang.brapi.service.ContentService;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +22,9 @@ public class FeedController {
     @Autowired
     private PersonalizedFeedService personalizedFeedService;
     
+    @Autowired
+    private ContentService contentService;
+    
     @Operation(summary = "获取个性化Feed流")
     @GetMapping("/personalized")
     public Result<Map<String, Object>> getPersonalizedFeed(
@@ -31,7 +34,6 @@ public class FeedController {
     ) {
         List<Content> contents = personalizedFeedService.getPersonalizedFeed(userId, page, size);
         
-        // ✅ 返回格式与 /content/list 保持一致
         Map<String, Object> result = new HashMap<>();
         result.put("list", contents);
         result.put("total", contents.size());
@@ -46,10 +48,9 @@ public class FeedController {
     public Result<Map<String, Object>> getConfig() {
         Map<String, Object> config = new HashMap<>();
         config.put("algorithm", "personalized");
-        config.put("hotWeight", 0.3);
-        config.put("timeWeight", 0.15);
-        config.put("interestWeight", 0.5);
-        config.put("qualityWeight", 0.05);
+        config.put("hotWeight", 40);
+        config.put("timeWeight", 30);
+        config.put("interactionWeight", 30);
         config.put("refreshInterval", 300);
         config.put("cacheTime", 3600);
         return Result.success(config);
@@ -64,29 +65,42 @@ public class FeedController {
     @Operation(summary = "Feed统计")
     @GetMapping("/stats")
     public Result<Map<String, Object>> getStats() {
-        Map<String, Object> stats = new HashMap<>();
-        stats.put("totalContent", 2580);
-        stats.put("todayPush", 156);
-        stats.put("cacheSize", 1024);
-        stats.put("avgScore", 75.5);
+        Map<String, Object> stats = contentService.getFeedStats();
         return Result.success(stats);
     }
     
     @Operation(summary = "Feed内容列表")
     @GetMapping("/contentList")
-    public Result<PageResult<Object>> getContentList(@RequestParam Map<String, Object> params) {
-        return Result.success(PageResult.of(0L, new ArrayList<>()));
+    public Result<PageResult<Content>> getContentList(@RequestParam Map<String, Object> params) {
+        PageResult<Content> result = contentService.getFeedContentList(params);
+        return Result.success(result);
     }
     
     @Operation(summary = "推送到Feed")
     @PostMapping("/push")
     public Result<Void> pushToFeed(@RequestBody Map<String, Object> params) {
-        return Result.success();
+        Long contentId = Long.valueOf(params.get("contentId").toString());
+        Double initialScore = 100.0;
+        if (params.get("initialScore") != null) {
+            initialScore = Double.valueOf(params.get("initialScore").toString());
+        }
+        boolean success = contentService.pushToFeed(contentId, initialScore);
+        return success ? Result.success() : Result.error("推送失败");
     }
     
     @Operation(summary = "从Feed移除")
     @DeleteMapping("/remove/{id}")
     public Result<Void> removeFromFeed(@PathVariable Long id) {
-        return Result.success();
+        boolean success = contentService.removeFromFeed(id);
+        return success ? Result.success() : Result.error("移除失败");
+    }
+    
+    @Operation(summary = "调整热度分数")
+    @PutMapping("/updateHotScore")
+    public Result<Void> updateHotScore(@RequestBody Map<String, Object> params) {
+        Long contentId = Long.valueOf(params.get("contentId").toString());
+        Double hotScore = Double.valueOf(params.get("hotScore").toString());
+        boolean success = contentService.updateHotScore(contentId, hotScore);
+        return success ? Result.success() : Result.error("更新失败");
     }
 }

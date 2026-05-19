@@ -1,7 +1,6 @@
 <view class="container">
   <view class="content-detail" wx:if="{{content}}">
     <!-- 内容标题 -->
-    {{content}}
     <view class="content-title">{{content.title}}</view>
 
     <!-- 作者信息 -->

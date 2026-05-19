@@ -64,6 +64,9 @@ public class ContentService extends ServiceImpl<ContentMapper, Content> {
         }
         if (StringUtils.hasText(status)) {
             wrapper.eq(Content::getStatus, status);
+        } else {
+            // 默认只查已发布的内容
+            wrapper.eq(Content::getStatus, "published");
         }
         if (StringUtils.hasText(contentType)) {
             wrapper.eq(Content::getContentType, contentType);
@@ -359,6 +362,144 @@ public class ContentService extends ServiceImpl<ContentMapper, Content> {
             "approvedCount", approvedCount,
             "rejectedCount", rejectedCount,
             "todayPendingCount", todayPendingCount
+        );
+    }
+    
+    /**
+     * 更新热度分数
+     */
+    public boolean updateHotScore(Long id, Double hotScore) {
+        Content content = new Content();
+        content.setId(id);
+        content.setHotScore(hotScore);
+        return updateById(content);
+    }
+    
+    /**
+     * 获取Feed流内容列表（后台管理）
+     */
+    public PageResult<Content> getFeedContentList(Map<String, Object> params) {
+        // ✅ 使用 PageUtils 安全地获取分页参数
+        Integer pageNum = PageUtils.getPageNum(params);
+        Integer pageSize = PageUtils.getPageSize(params);
+        String title = PageUtils.getString(params, "title");
+        String contentType = PageUtils.getString(params, "contentType");
+        
+        Page<Content> page = new Page<>(pageNum, pageSize);
+        LambdaQueryWrapper<Content> wrapper = new LambdaQueryWrapper<>();
+        
+        // Feed流条件：已发布 + 已推荐
+        wrapper.eq(Content::getStatus, "published")
+               .eq(Content::getIsRecommend, 1)
+               .eq(Content::getDeleted, 0);
+        
+        if (StringUtils.hasText(title)) {
+            wrapper.like(Content::getTitle, title);
+        }
+        if (StringUtils.hasText(contentType)) {
+            wrapper.eq(Content::getContentType, contentType);
+        }
+        
+        // 排序：置顶优先，然后按热度分
+        wrapper.orderByDesc(Content::getIsTop)
+               .orderByDesc(Content::getHotScore);
+        
+        IPage<Content> result = page(page, wrapper);
+        
+        // ✅ 手动处理 images 字段
+        List<Content> records = result.getRecords();
+        for (Content content : records) {
+            if (content.getImages() == null && content.getId() != null) {
+                try {
+                    String imagesJson = jdbcTemplate.queryForObject(
+                        "SELECT images FROM content WHERE id = ?",
+                        String.class,
+                        content.getId()
+                    );
+                    
+                    if (imagesJson != null && !imagesJson.trim().isEmpty()) {
+                        List<String> imagesList = objectMapper.readValue(
+                            imagesJson, 
+                            new TypeReference<List<String>>() {}
+                        );
+                        content.setImages(imagesList);
+                    }
+                } catch (Exception e) {
+                    content.setImages(new ArrayList<>());
+                }
+            }
+        }
+        
+        return PageResult.of(result.getTotal(), records);
+    }
+    
+    /**
+     * 推送到Feed流
+     */
+    public boolean pushToFeed(Long contentId, Double initialScore) {
+        Content content = getById(contentId);
+        if (content == null) {
+            return false;
+        }
+        content.setIsRecommend(1);
+        if (initialScore != null) {
+            content.setHotScore(initialScore);
+        }
+        return updateById(content);
+    }
+    
+    /**
+     * 从Feed流移除
+     */
+    public boolean removeFromFeed(Long contentId) {
+        Content content = getById(contentId);
+        if (content == null) {
+            return false;
+        }
+        content.setIsRecommend(0);
+        return updateById(content);
+    }
+    
+    /**
+     * 获取Feed流统计
+     */
+    public Map<String, Object> getFeedStats() {
+        // Feed流内容总数
+        Long totalCount = count(new LambdaQueryWrapper<Content>()
+            .eq(Content::getIsRecommend, 1)
+            .eq(Content::getDeleted, 0));
+        
+        // 今日新增Feed流内容
+        java.time.LocalDateTime todayStart = java.time.LocalDateTime.of(
+            java.time.LocalDate.now(), 
+            java.time.LocalTime.MIN
+        );
+        Long todayPushCount = count(new LambdaQueryWrapper<Content>()
+            .eq(Content::getIsRecommend, 1)
+            .ge(Content::getCreateTime, todayStart)
+            .eq(Content::getDeleted, 0));
+        
+        // 平均热度分数
+        Double avgHotScore = 0.0;
+        try {
+            List<Content> allFeedContent = list(new LambdaQueryWrapper<Content>()
+                .eq(Content::getIsRecommend, 1)
+                .eq(Content::getDeleted, 0));
+            if (!allFeedContent.isEmpty()) {
+                double sum = allFeedContent.stream()
+                    .mapToDouble(c -> c.getHotScore() != null ? c.getHotScore() : 0.0)
+                    .sum();
+                avgHotScore = sum / allFeedContent.size();
+            }
+        } catch (Exception e) {
+            avgHotScore = 0.0;
+        }
+        
+        return Map.of(
+            "totalContent", totalCount,
+            "todayPush", todayPushCount,
+            "cacheSize", 1024,
+            "avgScore", avgHotScore
         );
     }
 }

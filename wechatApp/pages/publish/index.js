@@ -13,7 +13,8 @@ Page({
     categories: [], // 分类列表
     selectedCategory: null, // 选中的分类
     tags: [], // 标签列表
-    selectedTags: [] // 选中的标签
+    selectedTags: [], // 选中的标签（标签名数组）
+    newTagInput: '' // 新标签输入
   },
 
   onLoad() {
@@ -83,26 +84,78 @@ Page({
     this.setData({ selectedCategory: category })
   },
 
-  onTagToggle(e) {
-    const tagId = e.currentTarget.dataset.id
-    const selectedTags = [...this.data.selectedTags]
-    const index = selectedTags.indexOf(tagId)
+  // 新标签输入
+  onNewTagInput(e) {
+    this.setData({ newTagInput: e.detail.value })
+  },
+
+  // 添加自定义标签
+  onAddCustomTag() {
+    const newTag = this.data.newTagInput.trim()
     
-    if (index > -1) {
-      // 已选中，取消选择
-      selectedTags.splice(index, 1)
-    } else {
-      // 未选中，添加选择（最多5个）
-      if (selectedTags.length >= 5) {
-        wx.showToast({
-          title: '最多选择5个标签',
-          icon: 'none'
-        })
-        return
-      }
-      selectedTags.push(tagId)
+    if (!newTag) {
+      wx.showToast({
+        title: '请输入标签内容',
+        icon: 'none'
+      })
+      return
     }
+
+    if (newTag.length < 1 || newTag.length > 10) {
+      wx.showToast({
+        title: '标签长度1-10字符',
+        icon: 'none'
+      })
+      return
+    }
+
+    if (this.data.selectedTags.length >= 5) {
+      wx.showToast({
+        title: '最多添加5个标签',
+        icon: 'none'
+      })
+      return
+    }
+
+    if (this.data.selectedTags.includes(newTag)) {
+      wx.showToast({
+        title: '标签已存在',
+        icon: 'none'
+      })
+      return
+    }
+
+    const selectedTags = [...this.data.selectedTags, newTag]
+    this.setData({ 
+      selectedTags,
+      newTagInput: ''
+    })
+  },
+
+  // 移除已选标签
+  onRemoveSelectedTag(e) {
+    const tag = e.currentTarget.dataset.tag
+    const selectedTags = this.data.selectedTags.filter(t => t !== tag)
+    this.setData({ selectedTags })
+  },
+
+  // 推荐标签切换
+  onRecommendTagToggle(e) {
+    const tag = e.currentTarget.dataset.tag
     
+    if (this.data.selectedTags.length >= 5) {
+      wx.showToast({
+        title: '最多添加5个标签',
+        icon: 'none'
+      })
+      return
+    }
+
+    if (this.data.selectedTags.includes(tag)) {
+      return
+    }
+
+    const selectedTags = [...this.data.selectedTags, tag]
     this.setData({ selectedTags })
   },
 
@@ -351,10 +404,7 @@ Page({
       console.log('发布时的用户信息:', userInfo)
 
       // 获取选中的标签名称
-      const selectedTagNames = this.data.tags
-        .filter(tag => this.data.selectedTags.includes(tag.id))
-        .map(tag => tag.tagName)
-        .join(',')
+      const selectedTagNames = this.data.selectedTags.join(',')
 
       // ✅ 确定 content_type：post（文本）、image（图片）、video（视频）
       let contentType = 'post' // 默认文本类型
